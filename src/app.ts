@@ -1,7 +1,7 @@
 import cors from 'cors';
 import express from 'express';
 import { ConfigService, IConfigAdapter, Secrets } from './infra/config';
-import { IRoutes } from './intercafes/routes';
+import { IRoutes } from './interfaces/routes';
 
 class App {
   public app: express.Application;
@@ -9,7 +9,7 @@ class App {
   public port: string | number;
   public config!: IConfigAdapter;
 
-  constructor(routes: IRoutes[]) {
+  constructor(routes: IRoutes<unknown>[]) {
     this.app = express();
     this.env = 'dev';
     this.port = 3000;
@@ -39,7 +39,7 @@ class App {
     this.app.use(cors({ origin: this.config.get(Secrets.ORIGIN), credentials: this.config.get(Secrets.CREDENTIALS) }));
   }
 
-  private initializeRoutes(routes: IRoutes[]) {
+  private initializeRoutes(routes: IRoutes<unknown>[]) {
     routes.forEach(route => {
       this.app.use('/', route.router);
     });

@@ -1,19 +1,17 @@
-import { Router } from 'express';
+import { Router, IRoute } from 'express';
 import { HealthController } from '../controllers/health';
-import { IRoutes } from '../intercafes/routes';
+import { IRoutes } from '../interfaces/routes';
 
-export class HealthRoute implements IRoutes {
-  public path = '/';
-  
+export class HealthRoute implements IRoutes<HealthController> {
   public router = Router();
 
-  public healthController = new HealthController()
+  public controller = new HealthController();
 
   constructor() {
     this.initializeRoutes();
   }
 
   private initializeRoutes() {
-    this.router.get(`${this.path}`, this.healthController.health);
+    this.router.get(`/`, this.controller.health);
   }
 }
