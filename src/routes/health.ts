@@ -1,4 +1,4 @@
-import { Router, IRoute } from 'express';
+import { Router } from 'express';
 import { HealthController } from '../controllers/health';
 import { IRoutes } from '../interfaces/routes';
 
