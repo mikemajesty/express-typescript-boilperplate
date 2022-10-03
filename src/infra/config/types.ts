@@ -3,5 +3,5 @@ export enum Secrets {
   PORT = 'PORT',
   HOST = 'HOST',
   ORIGIN = 'ORIGIN',
-  CREDENTIALS = 'CREDENTIALS'
+  CREDENTIALS = 'CREDENTIALS',
 }

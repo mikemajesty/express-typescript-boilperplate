@@ -1,3 +1,3 @@
-export * from './adapter'
-export * from './service'
-export * from './types'
+export * from './adapter';
+export * from './service';
+export * from './types';

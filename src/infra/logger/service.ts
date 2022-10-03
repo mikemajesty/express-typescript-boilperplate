@@ -1,16 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { ServerResponse } from 'node:http';
+
 import { gray, green, red, yellow } from 'colorette';
 import { DateTime } from 'luxon';
-import { ServerResponse } from 'node:http';
-import { LevelWithSilent, Logger, pino, multistream } from 'pino';
+import { LevelWithSilent, Logger, multistream, pino } from 'pino';
 import { HttpLogger, pinoHttp } from 'pino-http';
 import pinoPretty from 'pino-pretty';
 import { v4 as uuidv4 } from 'uuid';
 
 import { name } from '../../../package.json';
 import { ApiException } from '../../utils/exception/service';
-
 import { ILoggerAdapter } from './adapter';
-
 import { ErrorType, MessageType } from './types';
 
 export class LoggerService implements ILoggerAdapter<HttpLogger> {
@@ -137,9 +137,7 @@ export class LoggerService implements ILoggerAdapter<HttpLogger> {
         req.ctx = context;
         const traceId = req.event?.headers?.traceId || req.id;
 
-        const path = req.event?.requestContext
-          ? `${req.event.headers.Host}${req.event.requestContext.resourcePath}`
-          : 'invoke';
+        const path = req.event?.requestContext ? `${req.event.headers.Host}${req.event.requestContext.resourcePath}` : 'invoke';
 
         this.httpLogger.logger.setBindings({
           traceId,
@@ -182,19 +180,19 @@ export class LoggerService implements ILoggerAdapter<HttpLogger> {
     const errorResponse = [
       {
         conditional: isFunction && typeof error.getResponse() === 'string',
-        value: () =>
-          { const exception  = new ApiException(error.getResponse(), error.getStatus() || error['status'], error['context']) 
+        value: () => {
+          const exception = new ApiException(error.getResponse(), error.getStatus() || error['status'], error['context']);
           return {
             statusCode: exception.statusCode,
-            message: exception.message 
-          }
+            message: exception.message,
+          };
         },
       },
       {
         conditional: isFunction && typeof error.getResponse() === 'object',
         value: () => error?.getResponse(),
       },
-    ].find((c) => c.conditional);
+    ].find(c => c.conditional);
 
     return errorResponse?.value();
   }

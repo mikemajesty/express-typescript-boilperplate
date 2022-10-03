@@ -1,4 +1,4 @@
-import { ApiException } from "../../utils/exception";
+import { ApiException } from '../../utils/exception';
 
 export type MessageType = {
   message: string;

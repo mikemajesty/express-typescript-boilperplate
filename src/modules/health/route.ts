@@ -1,6 +1,7 @@
 import { Router } from 'express';
-import { HealthController } from './controller';
+
 import { IRoutes } from '../../interfaces/routes';
+import { HealthController } from './controller';
 import { HealthService } from './service';
 
 export class HealthRoute implements IRoutes<HealthController> {

@@ -1,3 +1,3 @@
 export interface IHealthService {
-  getHealth (): string
+  getHealth(): string;
 }

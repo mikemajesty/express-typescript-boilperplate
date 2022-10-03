@@ -1,5 +1,6 @@
 import { HttpStatus } from './status';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Response = any;
 
 export class ApiException extends Error {

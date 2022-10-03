@@ -1,2 +1,2 @@
-export * from './service'
-export * from './status'
+export * from './service';
+export * from './status';

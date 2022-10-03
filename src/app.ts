@@ -1,6 +1,7 @@
-import cors from 'cors';
 import { bold } from 'colorette';
+import cors from 'cors';
 import express from 'express';
+
 import { ConfigService, IConfigAdapter, Secrets } from './infra/config';
 import { ILoggerAdapter } from './infra/logger/adapter';
 import { LoggerService } from './infra/logger/service';
@@ -12,23 +13,24 @@ class App {
   public logger!: ILoggerAdapter;
 
   constructor(routes: IRoutes<unknown>[]) {
-    this.config = new ConfigService()
-    this.logger = new LoggerService()
+    this.config = new ConfigService();
+    this.logger = new LoggerService();
 
     this.app = express();
-  
+
     this.initializeMiddlewares();
     this.initializeRoutes(routes);
     // this.initializeErrorHandling();
   }
 
   public listen() {
-    const port = this.config.get<number>(Secrets.PORT)
+    const port = this.config.get<number>(Secrets.PORT);
     const host = this.config.get(Secrets.HOST);
+    const URI = `http://${host}:${port}`;
 
     this.app.listen(port, host, () => {
       this.logger.trace({ message: `   ============ ${bold(this.config.get(Secrets.ENV).toUpperCase())} =============\n` });
-      this.logger.trace({ message: `🚀 App listening at ${bold(`http://${host}:${port}`)} 🚀` });
+      this.logger.trace({ message: `🚀 App listening at ${bold(URI)} 🚀` });
     });
   }
 
@@ -39,9 +41,9 @@ class App {
   }
 
   private initializeRoutes(routes: IRoutes<unknown>[]) {
-    routes.forEach(route => {
+    for (const route of routes) {
       this.app.use('/', route.router);
-    });
+    }
   }
 
   // private initializeErrorHandling() {
