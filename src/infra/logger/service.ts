@@ -7,7 +7,7 @@ import pinoPretty from 'pino-pretty';
 import { v4 as uuidv4 } from 'uuid';
 
 import { name } from '../../../package.json';
-import { ApiException } from '../../libs/exception/service';
+import { ApiException } from '../../utils/exception/service';
 
 import { ILoggerAdapter } from './adapter';
 
@@ -56,7 +56,7 @@ export class LoggerService implements ILoggerAdapter<HttpLogger> {
     this.httpLogger.logger.info([obj, green(message)].find(Boolean), green(message));
   }
 
-  error(error: ErrorType, message?: string, context?: string): void {
+  error(error: ErrorType & { context: unknown }, message?: string, context?: string): void {
     const response = this.getErrorResponse(error);
     const model = {
       ...(response || error),
@@ -67,7 +67,7 @@ export class LoggerService implements ILoggerAdapter<HttpLogger> {
       application: this.app,
       trace: error.stack?.replace(/\n/g, '')?.replace('/', ''),
     };
-    this.httpLogger.logger.error(model, red(error?.message || message));
+    this.httpLogger.logger.error(model, red(String(error?.message || message)));
   }
 
   fatal(error: ApiException, message?: string, context?: string): void {
