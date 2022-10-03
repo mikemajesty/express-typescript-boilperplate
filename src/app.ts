@@ -23,14 +23,13 @@ class App {
   }
 
   public listen() {
-    this.app.listen(this.config.get<number>(Secrets.PORT), () => {
-      this.logger.trace({ message: `   ============ ${bold(this.config.get<number>(Secrets.ENV))} =============` });
-      this.logger.trace({ message: `🚀 App listening on the port ${this.config.get<number>(Secrets.PORT)} 🚀` });
-    });
-  }
+    const port = this.config.get<number>(Secrets.PORT)
+    const host = this.config.get(Secrets.HOST);
 
-  public getServer() {
-    return this.app;
+    this.app.listen(port, host, () => {
+      this.logger.trace({ message: `   ============ ${bold(this.config.get(Secrets.ENV).toUpperCase())} =============\n` });
+      this.logger.trace({ message: `🚀 App listening at ${bold(`http://${host}:${port}`)} 🚀` });
+    });
   }
 
   private initializeMiddlewares() {
