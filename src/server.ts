@@ -1,10 +1,7 @@
-import { config } from 'dotenv';
+import 'dotenv/config';
 
 import App from './app';
 import { HealthRoute } from './modules/health/route';
 
-config();
-
 const app = new App([new HealthRoute()]);
-
 app.listen();
