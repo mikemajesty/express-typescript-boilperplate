@@ -1,15 +1,14 @@
-import { NextFunction, Request, Response } from 'express';
+import { ApiRequest, ApiResponse } from '@/utils/types/express';
 
 import { IHealthService } from './adapter';
 
 export class HealthController {
   constructor(private service: IHealthService) {}
 
-  public health = (req: Request, res: Response, next: NextFunction): void => {
-    try {
-      res.json(this.service.getHealth());
-    } catch (error) {
-      next(error);
-    }
+  public health = (req: ApiRequest, res: ApiResponse): void => {
+    const message = this.service.getHealth();
+    req.infra.logger.info({ message });
+    throw new Error('AFF');
+    res.json(message);
   };
 }
