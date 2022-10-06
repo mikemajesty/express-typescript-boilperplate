@@ -33,6 +33,7 @@
     ".eslintrc.json"
   ],
   "rules": {
+    "@typescript-eslint/no-empty-function": "error",
     "unicorn/prevent-abbreviations": "off",
     "jest/expect-expect": "off",
     "unicorn/prefer-top-level-await": "off",
@@ -51,7 +52,7 @@
     "max-len": [
       "error",
       {
-        "code": 120,
+        "code": 150,
         "ignoreTemplateLiterals": true,
         "ignoreRegExpLiterals": true,
         "ignoreStrings": true,
