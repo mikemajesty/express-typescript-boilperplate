@@ -1,30 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ServerResponse } from 'node:http';
+import { IncomingMessage, ServerResponse } from 'node:http';
+import { exit } from 'node:process';
 
-import { gray, green, red, yellow } from 'colorette';
+import { green, greenBright, isColorSupported, red, yellow } from 'colorette';
+import { PinoRequestConverter } from 'convert-pino-request-to-curl';
 import { DateTime } from 'luxon';
 import { LevelWithSilent, Logger, multistream, pino } from 'pino';
-import { HttpLogger, pinoHttp } from 'pino-http';
+import { HttpLogger, Options, pinoHttp, ReqId } from 'pino-http';
 import pinoPretty from 'pino-pretty';
 import { v4 as uuidv4 } from 'uuid';
 
 import { name } from '../../../package.json';
 import { ApiException } from '../../utils/exception/service';
 import { ILoggerAdapter } from './adapter';
-import { ErrorType, MessageType } from './types';
+import { MessageType } from './types';
 
 export class LoggerService implements ILoggerAdapter<HttpLogger> {
   httpLogger!: HttpLogger;
-  private context!: string;
-  private app!: string;
+  private app: string = name;
 
   constructor(logLevel?: LevelWithSilent) {
-    this.setApplication(name);
-
     const pinoLogger = pino(
       {
         useLevelLabels: true,
-        level: [logLevel, 'trace'].find(Boolean),
+        level: logLevel || 'trace',
       },
       multistream([
         {
@@ -41,14 +40,13 @@ export class LoggerService implements ILoggerAdapter<HttpLogger> {
     this.app = app;
   }
 
-  trace({ message, context, obj = {} }: MessageType): void {
-    Object.assign(obj, { context });
-    this.httpLogger.logger.trace([obj, gray(message)].find(Boolean), gray(message));
+  log(message: string): void {
+    this.httpLogger.logger.trace(green(message));
   }
 
-  warn({ message, context, obj = {} }: MessageType): void {
+  trace({ message, context, obj = {} }: MessageType): void {
     Object.assign(obj, { context });
-    this.httpLogger.logger.warn([obj, yellow(message)].find(Boolean), yellow(message));
+    this.httpLogger.logger.trace([obj, greenBright(message)].find(Boolean), greenBright(message));
   }
 
   info({ message, context, obj = {} }: MessageType): void {
@@ -56,46 +54,63 @@ export class LoggerService implements ILoggerAdapter<HttpLogger> {
     this.httpLogger.logger.info([obj, green(message)].find(Boolean), green(message));
   }
 
-  error(error: ErrorType & { context: unknown }, message?: string, context?: string): void {
-    const response = this.getErrorResponse(error);
-    const model = {
-      ...(response || error),
-      context: [context, this.context, error['context']].find(Boolean),
-      type: error?.name || Error.name,
-      traceId: this.getTraceId(error),
-      timestamp: this.getDateFormat(),
-      application: this.app,
-      trace: error.stack?.replace(/\n/g, '')?.replace('/', ''),
-    };
-    this.httpLogger.logger.error(model, red(String(error?.message || message)));
+  warn({ message, context, obj = {} }: MessageType): void {
+    Object.assign(obj, { context });
+    this.httpLogger.logger.warn([obj, yellow(message)].find(Boolean), yellow(message));
   }
 
-  fatal(error: ApiException, message?: string, context?: string): void {
-    const model = {
-      ...error,
-      context: context || this.context,
-      type: error.name,
-      traceId: this.getTraceId(error),
-      timestamp: this.getDateFormat(),
-      application: this.app,
-      trace: error?.stack?.replace(/\n/g, '').replace('/', ''),
-    };
+  error(error: any, message?: string, context?: string): void {
+    const errorResponse = this.getErrorResponse(error);
 
-    this.httpLogger.logger.fatal(model, red(message || error.message));
+    const response = error?.name === ApiException.name ? { statusCode: error['statusCode'], message: error?.message } : errorResponse?.value();
+
+    const type = {
+      Error: ApiException.name,
+    }[String(error?.name)];
+
+    this.httpLogger.logger.error(
+      {
+        ...response,
+        context: [context, this.app].find(Boolean),
+        type: [type, error?.name].find(Boolean),
+        traceid: this.getTraceId(error),
+        timestamp: this.getDateFormat(),
+        application: this.app,
+        stack: error.stack,
+      },
+      red(String([message, error?.message, error].find(Boolean))),
+    );
+  }
+
+  fatal(error: any, message?: string, context?: string): void {
+    this.httpLogger.logger.fatal(
+      {
+        ...(error.getResponse() as object),
+        context: [context, this.app].find(Boolean),
+        type: error.name,
+        traceid: this.getTraceId(error),
+        timestamp: this.getDateFormat(),
+        application: this.app,
+        stack: error.stack,
+      },
+      red(String([message, error?.message, error].find(Boolean))),
+    );
+    exit(1);
   }
 
   getPinoConfig() {
     return {
-      colorize: true,
+      colorize: isColorSupported,
       levelFirst: true,
       ignore: 'pid,hostname',
       quietReqLogger: true,
       messageFormat: (log: any, messageKey: string) => {
         const message = log[String(messageKey)];
-        const context = [this.context, this.app]?.find((c: string) => c);
-        if (context) return `[${context}] ${message}`;
+        if (this.app) {
+          return `[${this.app}] ${message}`;
+        }
 
-        return `${message}`;
+        return message;
       },
       customPrettifiers: {
         time: () => {
@@ -105,58 +120,60 @@ export class LoggerService implements ILoggerAdapter<HttpLogger> {
     };
   }
 
-  getPinoHttpConfig(pinoLogger: Logger): any {
+  getPinoHttpConfig(pinoLogger: Logger): Options {
     return {
       logger: pinoLogger,
       quietReqLogger: true,
-      customSuccessMessage: (res: any) => {
+      customSuccessMessage: (_req: IncomingMessage, res: ServerResponse) => {
         return `request ${res.statusCode >= 400 ? red('errro') : green('success')} with status code: ${res.statusCode}`;
       },
-      customErrorMessage: function (error: Error | ApiException, res: ServerResponse) {
-        return `request ${red(error.name.toLowerCase())} with status code: ${res.statusCode} `;
+      customErrorMessage: (_req: IncomingMessage, res: ServerResponse, error: Error) => {
+        return `request ${red(error.name)} with status code: ${res.statusCode} `;
       },
-      genReqId: (req: any) => {
-        return req.event.headers.traceId;
+      genReqId: (req: any): ReqId => {
+        req['id'] = req.headers['traceid'];
+        return req.id;
       },
       customAttributeKeys: {
         req: 'request',
         res: 'response',
         err: 'error',
         responseTime: 'timeTaken',
-        reqId: 'traceId',
+        reqId: 'traceid',
       },
       serializers: {
-        err: (err: any) => pino.stdSerializers.err(err),
-        req: (req: any) => {
-          return req;
+        err: () => {
+          return;
+        },
+        req: (request: any) => {
+          return {
+            method: request.method,
+            curl: PinoRequestConverter.getCurl(request),
+          };
         },
         res: pino.stdSerializers.res,
       },
-      customProps: (req: any): unknown => {
-        const context = this.context || req.context.functionName;
-        req.ctx = context;
-        const traceId = req.event?.headers?.traceId || req.id;
+      customProps: (req: any): object => {
+        const context = req.context;
 
-        const path = req.event?.requestContext ? `${req.event.headers.Host}${req.event.requestContext.resourcePath}` : 'invoke';
+        const traceid = [req?.headers?.traceid, req.id].find(Boolean);
 
-        this.httpLogger.logger.setBindings({
-          traceId,
-          application: this.app,
-          context: context,
-          path,
-          timestamp: this.getDateFormat(),
-        });
+        const path = `${req.protocol}://${req.headers.host}${req.url}`;
 
-        return {
-          traceId,
+        const info = {
+          traceid,
           application: this.app,
           context: context,
           path,
           timestamp: this.getDateFormat(),
         };
+
+        this.httpLogger.logger.setBindings(info);
+
+        return this.httpLogger.logger.bindings();
       },
-      customLogLevel: (res: any, err: any) => {
-        if ([res.statusCode >= 400, err].some(Boolean)) {
+      customLogLevel: (_req: IncomingMessage, res: ServerResponse, error: Error): pino.LevelWithSilent => {
+        if ([error, res?.statusCode >= 400].some(Boolean)) {
           return 'error';
         }
 
@@ -169,22 +186,16 @@ export class LoggerService implements ILoggerAdapter<HttpLogger> {
     };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private getErrorResponse(error: any) {
-    if (error?.name === ApiException.name) {
-      return { statusCode: error['statusCode'], message: error?.message };
-    }
-
+  private getErrorResponse(error: any): any {
     const isFunction = typeof error?.getResponse === 'function';
-
-    const errorResponse = [
+    return [
       {
         conditional: isFunction && typeof error.getResponse() === 'string',
         value: () => {
-          const exception = new ApiException(error.getResponse(), error.getStatus() || error['status'], error['context']);
+          const err = new ApiException(error.getResponse(), [error.getStatus(), error['status']].find(Boolean), error['context']);
           return {
-            statusCode: exception.statusCode,
-            message: exception.message,
+            statusCode: [err?.statusCode, err?.code, 500].find(Boolean),
+            message: [err?.message, err].find(Boolean),
           };
         },
       },
@@ -193,16 +204,14 @@ export class LoggerService implements ILoggerAdapter<HttpLogger> {
         value: () => error?.getResponse(),
       },
     ].find(c => c.conditional);
-
-    return errorResponse?.value();
   }
 
-  private getDateFormat(date = new Date()): string {
-    return DateTime.fromJSDate(date).setZone(process.env.TZ).toFormat('yyyy-MM-dd HH:mm:ss');
+  private getDateFormat(date = new Date(), format = 'dd-MM-yyyy HH:mm:ss'): string {
+    return DateTime.fromJSDate(date).setZone(process.env.TZ).toFormat(format);
   }
 
-  private getTraceId(err: any): string {
-    if (typeof err === 'string') return uuidv4();
-    return [err.traceId, this.httpLogger.logger.bindings()?.tranceId].find(Boolean);
+  private getTraceId(error: any): string {
+    if (typeof error === 'string') return uuidv4();
+    return [error.traceid, this.httpLogger.logger.bindings()['tranceId']].find(Boolean);
   }
 }
