@@ -42,7 +42,7 @@
       "error"
     ],
     "@typescript-eslint/no-explicit-any": [
-      "error"
+      "off"
     ],
     "security/detect-object-injection": [
       "error"

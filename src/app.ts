@@ -46,12 +46,9 @@ class App {
     for (const route of this.routes) {
       this.logger.trace({ message: `${bold(route.constructor.name)} dependencies initialized` });
 
-      const routeMap = route.router.stack.map(r => r.route);
+      const routeMap = route.router.stack.filter(r => r?.route).map(r => r.route);
 
       for (const r of routeMap) {
-        if (!r) {
-          continue;
-        }
         this.logger.trace({
           message: `${route.controller.constructor.name} {${r.path} - ${Object.keys(r.methods).toString().toUpperCase()}}`,
         });
@@ -70,11 +67,11 @@ class App {
   private initializeRoutesMiddlewares(routes: IRoutes<unknown>[]) {
     for (const route of routes) {
       this.app.use('/', route.router);
-      this.initializeError(route);
+      this.initializeErrorMiddleware(route);
     }
   }
 
-  private initializeError(route: IRoutes<unknown>) {
+  private initializeErrorMiddleware(route: IRoutes<unknown>) {
     route.router.use(errorHandler as unknown as Middleware);
   }
 }

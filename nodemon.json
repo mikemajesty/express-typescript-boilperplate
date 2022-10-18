@@ -3,6 +3,7 @@
         "src",
         ".env"
     ],
+    "delay": "500",
     "ext": "js,ts,json",
     "ignore": [
         "src/**/*.{spec,test}.ts"

@@ -1,10 +1,6 @@
-import { FilterQuery, MongooseOptions, QueryOptions, SaveOptions, UpdateQuery, UpdateWithAggregationPipeline } from 'mongoose';
+import { FilterQuery, QueryOptions, SaveOptions, UpdateQuery, UpdateWithAggregationPipeline } from 'mongoose';
 
 import { CreatedModel, RemovedModel, UpdatedModel } from './types';
-
-export abstract class IDataBaseService {
-  abstract getDefaultConnection<T = MongooseOptions>(options?: T): T;
-}
 
 export abstract class IRepository<T> {
   abstract isConnected(): Promise<void>;
