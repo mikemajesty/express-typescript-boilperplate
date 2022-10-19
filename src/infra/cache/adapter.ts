@@ -1,7 +1,7 @@
 import { MemoryCacheSetType } from './memory/types';
 import { RedisCacheKeyArgument, RedisCacheKeyValue, RedisCacheValeuArgument } from './redis/types';
 
-export interface ICacheAdapter<T> {
+export interface ICacheAdapter<T = object> {
   client: T;
 
   isConnected(): Promise<void> | void;

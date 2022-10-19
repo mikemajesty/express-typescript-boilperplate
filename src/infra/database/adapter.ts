@@ -1,5 +1,4 @@
-import { MongooseOptions } from 'mongoose';
-
-export abstract class IDataBaseService {
-  abstract getDefaultConnection<T = MongooseOptions>(options?: T): T;
+export interface IDataBaseService<TInstance, TModel> {
+  getConnectionString(config: TModel): string;
+  connect(connection: string): Promise<TInstance>;
 }

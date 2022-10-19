@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  db:
+    container_name: typescript-boilerplate-mongo
+    image: mongo
+    env_file:
+      - .env
+    ports:
+      - 27017:27017
+  mongo-express:
+    container_name: typescript-boilerplate-mongo-express
+    image: mongo-express
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - 8082:8082
+    env_file:
+      - .env
+  redis:
+    container_name: typescript-boilerplate-redis
+    image: 'redis:alpine'
+    ports:
+      - 6379:6379
+  redis-commander:
+    container_name: typescript-boilerplate-redis-commander
+    image: rediscommander/redis-commander:latest
+    restart: always
+    depends_on:
+      - redis
+    env_file:
+      - .env
+    ports:
+      - '8081:8081'

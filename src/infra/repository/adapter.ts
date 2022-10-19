@@ -1,31 +1,21 @@
-import { FilterQuery, QueryOptions, SaveOptions, UpdateQuery, UpdateWithAggregationPipeline } from 'mongoose';
-
-import { CreatedModel, RemovedModel, UpdatedModel } from './types';
+import { RemovedModel, UpdatedModel } from './types';
 
 export abstract class IRepository<T> {
   abstract isConnected(): Promise<void>;
 
-  abstract create<T = SaveOptions>(document: object, saveOptions?: T): Promise<CreatedModel>;
+  abstract create<TOptions>(document: object, saveOptions?: TOptions): Promise<T>;
 
   abstract findById(id: string | number): Promise<T | null>;
 
   abstract findAll(): Promise<T[]>;
 
-  abstract find<TQuery = FilterQuery<T>, TOptions = QueryOptions<T>>(filter: TQuery, options?: TOptions | null): Promise<T[] | null>;
+  abstract find<TQuery, TOptions>(filter: TQuery, options?: TOptions | null): Promise<T[] | null>;
 
-  abstract remove<TQuery = FilterQuery<T>>(filter: TQuery): Promise<RemovedModel>;
+  abstract remove<TQuery>(filter: TQuery): Promise<RemovedModel>;
 
-  abstract findOne<TQuery = FilterQuery<T>, TOptions = QueryOptions<T>>(filter: TQuery, options?: TOptions): Promise<T | null>;
+  abstract findOne<TQuery, TOptions>(filter: TQuery, options?: TOptions): Promise<T | null>;
 
-  abstract updateOne<TQuery = FilterQuery<T>, TUpdate = UpdateQuery<T> | UpdateWithAggregationPipeline, TOptions = QueryOptions<T>>(
-    filter: TQuery,
-    updated: TUpdate,
-    options?: TOptions,
-  ): Promise<UpdatedModel>;
+  abstract updateOne<TQuery, TUpdate, TOptions>(filter: TQuery, updated: TUpdate, options?: TOptions): Promise<UpdatedModel>;
 
-  abstract updateMany<TQuery = FilterQuery<T>, TUpdate = UpdateQuery<T> | UpdateWithAggregationPipeline, TOptions = QueryOptions<T>>(
-    filter: TQuery,
-    updated: TUpdate,
-    options?: TOptions,
-  ): Promise<UpdatedModel>;
+  abstract updateMany<TQuery, TUpdate, TOptions>(filter: TQuery, updated: TUpdate, options?: TOptions): Promise<UpdatedModel>;
 }

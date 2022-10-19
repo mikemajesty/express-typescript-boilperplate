@@ -12,8 +12,3 @@ export type RemovedModel = {
   deletedCount: number;
   deleted: boolean;
 };
-
-export type CreatedModel = {
-  id: string;
-  created: boolean;
-};

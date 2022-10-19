@@ -1,5 +1,6 @@
 import NodeCache from 'node-cache';
 
+import { ILoggerAdapter } from '@/infra/logger';
 import { ApiException, HttpStatus } from '@/utils/exception';
 
 import { ICacheAdapter } from '../adapter';
@@ -10,10 +11,11 @@ export class MemoryCacheService implements ICacheAdapter<NodeCache> {
 
   private readonly NOT_IMPLEMENT_ERROR = new Error('Method not implemented.');
 
-  constructor(private config?: NodeCache.Options) {}
+  constructor(private readonly logger: ILoggerAdapter, private config?: NodeCache.Options) {}
 
   connect(): NodeCache {
     this.client = new NodeCache(this.config || { stdTTL: 3600, checkperiod: 3600 });
+    this.logger.trace({ message: 'CacheMemory connected!' });
     return this.client;
   }
 

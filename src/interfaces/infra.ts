@@ -8,5 +8,6 @@ export interface IInfra {
   logger: ILoggerAdapter;
   config: IConfigAdapter;
   http: IHttpAdapter;
-  cache?: ICacheAdapter;
+  redis?: ICacheAdapter;
+  memory?: ICacheAdapter;
 }
