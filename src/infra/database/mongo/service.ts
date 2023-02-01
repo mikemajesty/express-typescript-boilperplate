@@ -6,6 +6,8 @@ import { IDataBaseService } from '../adapter';
 import { ConnectionModel } from './types';
 
 export class MongoService implements IDataBaseService<typeof mongoose, ConnectionModel> {
+  client!: typeof mongoose;
+
   constructor(private readonly logger: ILoggerAdapter) {}
 
   getConnectionString(config: ConnectionModel): string {
@@ -13,10 +15,10 @@ export class MongoService implements IDataBaseService<typeof mongoose, Connectio
   }
 
   async connect(connection: string): Promise<typeof mongoose> {
-    const conn = await mongoose.connect(connection);
-    if (conn.connection.readyState === 1) {
+    this.client = await mongoose.connect(connection);
+    if (this.client.connection.readyState === 1) {
       this.logger.trace({ message: 'Mongo Connected!' });
     }
-    return conn;
+    return this.client;
   }
 }

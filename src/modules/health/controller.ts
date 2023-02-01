@@ -1,13 +1,12 @@
+import { name, version } from '@/../package.json';
 import { ApiRequest, ApiResponse } from '@/utils/types/express';
 
-import { IHealthService } from './adapter';
-interface IHealthController {}
+import { Test } from '../../core/usecases/teste';
 
 export class HealthController {
-  constructor(private service: IHealthService) {}
-
-  public health = (req: ApiRequest, res: ApiResponse): void => {
-    const message = this.service.getHealth();
+  public health = (req: ApiRequest, res: ApiResponse) => {
+    new Test();
+    const message = `${name}-${version} UP!!`;
     req.infra.logger.info({ message });
     res.json(message);
   };

@@ -33,3 +33,17 @@ services:
       - .env
     ports:
       - '8081:8081'
+  postgres:
+    container_name: typescript-boilerplate-postgres
+    image: postgres
+    restart: always
+    ports:
+      - '5432:5432'
+    env_file:
+      - .env
+  adminer:
+    container_name: typescript-boilerplate-adminer
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080

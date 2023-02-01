@@ -2,14 +2,13 @@ import NodeCache from 'node-cache';
 
 import { ILoggerAdapter } from '@/infra/logger';
 import { ApiException, HttpStatus } from '@/utils/exception';
+import { NOT_IMPLEMENT_ERROR } from '@/utils/types/error';
 
 import { ICacheAdapter } from '../adapter';
 import { MemoryCacheKeyArgument, MemoryCacheSetType, MemoryCacheTTL, MemoryCacheValeuArgument } from './types';
 
 export class MemoryCacheService implements ICacheAdapter<NodeCache> {
   client!: NodeCache;
-
-  private readonly NOT_IMPLEMENT_ERROR = new Error('Method not implemented.');
 
   constructor(private readonly logger: ILoggerAdapter, private config?: NodeCache.Options) {}
 
@@ -53,19 +52,19 @@ export class MemoryCacheService implements ICacheAdapter<NodeCache> {
   }
 
   hGet(): void {
-    throw this.NOT_IMPLEMENT_ERROR;
+    throw NOT_IMPLEMENT_ERROR;
   }
 
   hSet(): void {
-    throw this.NOT_IMPLEMENT_ERROR;
+    throw NOT_IMPLEMENT_ERROR;
   }
 
   hGetAll(): Promise<unknown> {
-    throw this.NOT_IMPLEMENT_ERROR;
+    throw NOT_IMPLEMENT_ERROR;
   }
 
   setMulti(): Promise<void> {
-    throw this.NOT_IMPLEMENT_ERROR;
+    throw NOT_IMPLEMENT_ERROR;
   }
 
   private throwException(error: string) {

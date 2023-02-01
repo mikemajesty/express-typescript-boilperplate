@@ -2,14 +2,13 @@ import { createClient, RedisClientOptions, RedisClientType } from 'redis';
 
 import { ILoggerAdapter } from '@/infra/logger';
 import { ApiException, HttpStatus } from '@/utils/exception';
+import { NOT_IMPLEMENT_ERROR } from '@/utils/types/error';
 
 import { ICacheAdapter } from '../adapter';
 import { RedisCacheKeyArgument, RedisCacheKeyValue, RedisCacheValeuArgument } from './types';
 
 export class RedisCacheService implements ICacheAdapter<RedisClientType> {
   readonly client: RedisClientType;
-
-  private readonly NOT_IMPLEMENT_ERROR = new Error('Method not implemented.');
 
   constructor(private readonly config: RedisClientOptions, private readonly logger: ILoggerAdapter) {
     this.client = createClient(this.config) as RedisClientType;
@@ -78,15 +77,15 @@ export class RedisCacheService implements ICacheAdapter<RedisClientType> {
   }
 
   mSet(): boolean {
-    throw this.NOT_IMPLEMENT_ERROR;
+    throw NOT_IMPLEMENT_ERROR;
   }
 
   mGet(): unknown {
-    throw this.NOT_IMPLEMENT_ERROR;
+    throw NOT_IMPLEMENT_ERROR;
   }
 
   has(): boolean {
-    throw this.NOT_IMPLEMENT_ERROR;
+    throw NOT_IMPLEMENT_ERROR;
   }
 
   private throwException(error: string) {

@@ -8,6 +8,7 @@
       "name": "App: debug",
       "type": "node",
       "request": "launch",
+      "cwd": "${workspaceFolder}",
       "runtimeExecutable": "yarn",
       "runtimeArgs": [
         "start:dev"

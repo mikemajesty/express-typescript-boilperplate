@@ -1,9 +1,11 @@
-import { IInfra } from '@/interfaces/infra';
-import { ApiRequest } from '@/utils/types/express';
+import { ServerResponse } from 'node:http';
 
-export const infraMiddleware = (infra: IInfra) => {
-  return (req: ApiRequest, res: any, next: any) => {
-    req.infra = { config: infra.config, logger: infra.logger, http: infra.http, redis: infra.redis, memory: infra.memory };
+import { IInfra } from '@/interfaces/infra';
+import { ApiNextFunction, NextHandleFunction } from '@/utils/types/express';
+
+export const infraMiddleware = (infra: IInfra): NextHandleFunction => {
+  return (req: any, res: ServerResponse, next: ApiNextFunction) => {
+    req['infra'] = { config: infra.config, logger: infra.logger, http: infra.http, redis: infra.redis, memory: infra.memory };
     next();
   };
 };

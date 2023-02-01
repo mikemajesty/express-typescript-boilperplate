@@ -120,7 +120,7 @@ export class LoggerService implements ILoggerAdapter<HttpLogger> {
     };
   }
 
-  getPinoHttpConfig(pinoLogger: Logger): Options {
+  getPinoHttpConfig(pinoLogger?: Logger): Options {
     return {
       logger: pinoLogger,
       quietReqLogger: true,
@@ -162,7 +162,6 @@ export class LoggerService implements ILoggerAdapter<HttpLogger> {
 
         const info = {
           traceid,
-          application: this.app,
           context: context,
           path,
           timestamp: this.getDateFormat(),

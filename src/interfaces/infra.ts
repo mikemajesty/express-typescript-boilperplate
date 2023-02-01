@@ -1,3 +1,4 @@
+import { IDataBaseService } from '@/infra/database/adapter';
 import { IHttpAdapter } from '@/infra/http';
 
 import { ICacheAdapter } from '../infra/cache';
@@ -8,6 +9,8 @@ export interface IInfra {
   logger: ILoggerAdapter;
   config: IConfigAdapter;
   http: IHttpAdapter;
-  redis?: ICacheAdapter;
-  memory?: ICacheAdapter;
+  redis: ICacheAdapter;
+  memory: ICacheAdapter;
+  mongo: IDataBaseService;
+  prisma: IDataBaseService;
 }

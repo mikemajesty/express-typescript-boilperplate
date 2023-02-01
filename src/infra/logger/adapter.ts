@@ -13,3 +13,8 @@ export interface ILoggerAdapter<T extends HttpLogger = HttpLogger> {
   getPinoHttpConfig(pinoLogger: unknown): unknown;
   getPinoConfig(): unknown;
 }
+
+// Logger.trace(): tracerId: string
+// Logger.setup({ app: string })
+// Logger.info(message: string, data?: any)
+// Logger.error(error: Error)

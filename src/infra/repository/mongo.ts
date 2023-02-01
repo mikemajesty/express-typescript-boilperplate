@@ -4,9 +4,9 @@ import { Document } from 'mongoose';
 import { ApiException, HttpStatus } from '@/utils/exception';
 
 import { IRepository } from './adapter';
-import { CreatedModel, RemovedModel, UpdatedModel } from './types';
+import { RemovedModel, UpdatedModel } from './types';
 
-export abstract class Repository<T extends Document> implements IRepository<T> {
+export abstract class MongoRepository<T extends Document> implements IRepository<T> {
   model: Model<T>;
 
   constructor(model: Model<T>) {
@@ -17,11 +17,9 @@ export abstract class Repository<T extends Document> implements IRepository<T> {
     if (this.model.db.readyState !== 1) throw new ApiException(`db ${this.model.db.name} disconnected`, HttpStatus.INTERNAL_SERVER_ERROR, 'Database');
   }
 
-  async create<T = SaveOptions>(document: object, saveOptions?: T): Promise<CreatedModel> {
+  async create<TOptions = SaveOptions>(document: object, saveOptions?: TOptions): Promise<T> {
     const createdEntity = new this.model(document);
-    const savedResult = await createdEntity.save(saveOptions as SaveOptions);
-
-    return { id: savedResult.id, created: !!savedResult.id };
+    return await createdEntity.save(saveOptions as SaveOptions);
   }
 
   async find<TFilter = FilterQuery<T>, TQuery = QueryOptions>(filter: TFilter, options?: TQuery): Promise<T[]> {

@@ -1,9 +1,9 @@
 import { DateTime } from 'luxon';
 
 import { ApiException } from '@/utils/exception';
-import { ApiNextFunction, ApiRequest, ApiResponse } from '@/utils/types/express';
+import { ApiNextFunction, ApiResponse } from '@/utils/types/express';
 
-export const errorHandler = (err: ApiException, req: ApiRequest, res: ApiResponse, next: ApiNextFunction): void => {
+export const errorHandler = (err: ApiException, req: any, res: ApiResponse, next: ApiNextFunction): void => {
   req.infra.logger.error(err);
 
   const code = Number([err['code'], err['statusCode'], 500].find(Boolean));
@@ -13,7 +13,7 @@ export const errorHandler = (err: ApiException, req: ApiRequest, res: ApiRespons
       name: err?.name,
       message: [err['message'], err].find(Boolean),
       traceId: req.id,
-      path: req.path,
+      path: req['path'],
       timestamp: DateTime.fromJSDate(new Date()).setZone(process.env.TZ),
     },
   });
